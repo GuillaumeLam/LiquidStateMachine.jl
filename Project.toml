@@ -1,0 +1,15 @@
+name = "LiquidStateMachine"
+uuid = "6281f674-6f4f-47ad-92d2-3ba7db8cf4a5"
+authors = ["Guillaume Lam <guillaume.lam10100@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+StableRNGs = "860ef19b-820b-49d6-a774-d7a799459cd3"
+StatsFuns = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
+WaspNet = "c0b53cd3-4946-4106-b8e7-91971464ade9"
+Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
