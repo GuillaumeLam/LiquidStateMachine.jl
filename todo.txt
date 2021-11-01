@@ -1,1 +1,0 @@
-- account for lsm instantiation with only lsm_params
