@@ -11,3 +11,4 @@ Compatible with Flux.jl & Zygote.jl.
 + add readme badge of top two items
 + publish package
 + make python version of lib
++ make logo for package
