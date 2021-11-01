@@ -1,8 +1,8 @@
-LiquidStateMachine.jl
+# LiquidStateMachine.jl
 
 *package description*
 
-TODO:
+### TODO:
 =====
 + add docs
 + add tests
