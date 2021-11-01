@@ -31,22 +31,7 @@ mutable struct LSM{N<:AbstractNetwork}
         return z
     end
 
-    LSM(readout, res::N, func; visual) where {N<:AbstractNetwork} =
-        new{N}(
-            readout,
-            res,
-            func,
-            SpikeTrainGenerator(Distributions.Bernoulli),
-            visual ?
-                Dict(
-                    "env"=>Array{Float64}(undef, 0, 4),
-                    "out"=>Array{Float64}(undef, 0, 2),
-                    "spike"=>Vector{Float64}(undef, 0)
-                ) :
-                nothing
-        )
-
-    LSM(readout, res::N, func, rng; visual) where {N<:AbstractNetwork} =
+    LSM(readout, res::N, func; rng, visual) where {N<:AbstractNetwork} =
         new{N}(
             readout,
             res,
@@ -56,27 +41,30 @@ mutable struct LSM{N<:AbstractNetwork}
                 Dict(
                     "env"=>Array{Float64}(undef, 0, 4),
                     "out"=>Array{Float64}(undef, 0, 2),
-                    "spike"=>[]
+                    "spike"=>Vector{Float64}(undef, 0)
                 ) :
                 nothing
         )
 end
 
-function LSM(params::P, rng::R, func; visual=false) where {P<:LSM_Params,R<:AbstractRNG}
+
+function LSM(params::P, readout, func::F; rng::R=StableRNGs.StableRNG(123), visual=false) where {F<:Function,P<:LSM_Params,R<:AbstractRNG}
+    reservoir = init_res(params, rng)
+    return LSM(readout, reservoir, func; rng=rng, visual=visual)
+end
+
+function LSM(params::P, func::F; rng::R=StableRNGs.StableRNG(123), visual=false) where {F<:Function,P<:LSM_Params,R<:AbstractRNG}
     reservoir = init_res(params, rng)
     readout = Chain(Dense(rand(rng,params.res_out, params.ne), rand(rng, params.res_out), relu),
         Dense(rand(rng, params.n_out, params.res_out), rand(rng, params.n_out)))
-    return LSM(readout, reservoir, func, rng; visual=visual)
+    return LSM(readout, reservoir, func; rng=rng, visual=visual)
 end
 
-function LSM(params::P, readout, rng::R, func) where {P<:LSM_Params,R<:AbstractRNG}
-    reservoir = init_res(params, rng)
-    return LSM(readout, reservoir, func, rng)
-end
+LSM(params::P, readout; rng::R=StableRNGs.StableRNG(123), visual=false) where {P<:LSM_Params,R<:AbstractRNG} =
+    LSM(params::P, readout, identity; rng=rng, visual=visual)
 
-LSM(params::P, rng::R) where {P<:LSM_Params,R<:AbstractRNG} = LSM(params, rng, identity)
-LSM(params::P, readout, rng::R) where {P<:LSM_Params,R<:AbstractRNG} = LSM(params::P, readout, rng, identity)
-
+LSM(params::P; rng::R=StableRNGs.StableRNG(123), visual=false) where {P<:LSM_Params,R<:AbstractRNG} =
+    LSM(params, identity; rng=rng, visual=visual)
 
 ###
 # Overloaded functions
@@ -124,12 +112,10 @@ function init_res(params::LSM_Params, rng::AbstractRNG)
     ### liquid-in layer creation
     in_n = [WaspNet.LIF(lif_params...) for _ in 1:params.res_in]
     in_w = randn(rng, params.res_in, params.n_in)
-    # in_w = sparse(in_w)
     in_l = Layer(in_n, in_w)
 
-
     #=
-        Maybe seperating the exc and inh pools will result in quicker runtime
+        Maybe seperating the exc. and inh. pools will result in quicker runtime
         with similar acc
     =#
 
@@ -138,7 +124,6 @@ function init_res(params::LSM_Params, rng::AbstractRNG)
     append!(res_n, [WaspNet.InhibNeuron(WaspNet.LIF(lif_params...)) for _ in 1:params.ni])
 
     W_in = cat(create_conn.(rand(rng, params.res_in, params.ne),params.K,params.PE_UB,params.res_in), zeros(params.res_in,params.ni), dims=2)'
-    # W_in = SparseArrays.sparse(W_in)
 
     W_EI = create_conn.(rand(rng, params.ne,params.ni), params.C, params.EI_UB, params.ne)
     W_IE = create_conn.(rand(rng, params.ni,params.ne), params.C, params.IE_UB, params.ne)
@@ -147,7 +132,6 @@ function init_res(params::LSM_Params, rng::AbstractRNG)
     W_II = W_IE*W_EI
 
     W_res = cat(cat(W_EE, W_EI, dims=2),cat(W_IE, W_II, dims=2), dims=1)
-    # W_res = SparseArrays.sparse(W_res)
 
     res_w = [W_in, W_res]
     conns = [1, 2]
