@@ -2,6 +2,7 @@ mutable struct SpikeTrainGenerator
     d
     sample
     rng
+    generator
 
     SpikeTrainGenerator(d) = new(d,[])
     SpikeTrainGenerator(d, rng) = new(d,[],rng)
@@ -19,12 +20,14 @@ function (stg::SpikeTrainGenerator)(x::AbstractVector)
     if !isnothing(stg.rng)
         stg.sample = rand(stg.rng, ds)
         f(_) =  rand!(stg.rng, ds, stg.sample)
-        return f
+        stg.generator = f
     else
         stg.sample = rand(ds)
-        f(_) = rand!(ds, stg.sample)
-        return f
+        g(_) = rand!(ds, stg.sample)
+        stg.generator = g
     end
+
+    return stg.generator
 end
 
 function (stg::SpikeTrainGenerator)(m::AbstractMatrix)
