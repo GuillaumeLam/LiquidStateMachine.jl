@@ -1,6 +1,8 @@
 # LiquidStateMachine.jl
 
-*package description*
+Package for LSM framework using WaspNet.jl at the core for spiking neuron dynamics.
+Interfaces with ReinforcementLearning.jl.
+Compatible with Flux.jl & Zygote.jl.
 
 ### TODO:
 =====
