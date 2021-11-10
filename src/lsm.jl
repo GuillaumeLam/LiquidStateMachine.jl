@@ -1,8 +1,8 @@
 mutable struct LSM{N<:AbstractNetwork}
-    readout
-    reservoir::N
     preprocessing::Function
     st_gen::SpikeTrainGenerator
+    reservoir::N
+    readout
 
     states_dict
 
@@ -31,12 +31,12 @@ mutable struct LSM{N<:AbstractNetwork}
         return z
     end
 
-    LSM(readout, res::N, func; rng, visual) where {N<:AbstractNetwork} =
+    LSM(func, res::N, readout; rng, visual) where {N<:AbstractNetwork} =
         new{N}(
-            readout,
-            res,
             func,
             SpikeTrainGenerator(Distributions.Bernoulli, rng),
+            res,
+            readout,
             visual ?
                 Dict(
                     "env"=>Array{Float64}(undef, 0, 4),
@@ -48,20 +48,20 @@ mutable struct LSM{N<:AbstractNetwork}
 end
 
 
-function LSM(params::P, readout, func::F; rng::R=StableRNGs.StableRNG(123), visual=false) where {F<:Function,P<:LSM_Params,R<:AbstractRNG}
+function LSM(params::P, func::F, readout; rng::R=StableRNGs.StableRNG(123), visual=false) where {F<:Function,P<:LSM_Params,R<:AbstractRNG}
     reservoir = init_res(params, rng)
-    return LSM(readout, reservoir, func; rng=rng, visual=visual)
+    return LSM(func, reservoir, readout; rng=rng, visual=visual)
 end
 
 function LSM(params::P, func::F; rng::R=StableRNGs.StableRNG(123), visual=false) where {F<:Function,P<:LSM_Params,R<:AbstractRNG}
     reservoir = init_res(params, rng)
     readout = Chain(Dense(rand(rng,params.res_out, params.ne), rand(rng, params.res_out), relu),
         Dense(rand(rng, params.n_out, params.res_out), rand(rng, params.n_out)))
-    return LSM(readout, reservoir, func; rng=rng, visual=visual)
+    return LSM(func, reservoir, readout; rng=rng, visual=visual)
 end
 
 LSM(params::P, readout; rng::R=StableRNGs.StableRNG(123), visual=false) where {P<:LSM_Params,R<:AbstractRNG} =
-    LSM(params::P, readout, identity; rng=rng, visual=visual)
+    LSM(params::P, identity, readout; rng=rng, visual=visual)
 
 LSM(params::P; rng::R=StableRNGs.StableRNG(123), visual=false) where {P<:LSM_Params,R<:AbstractRNG} =
     LSM(params, identity; rng=rng, visual=visual)
@@ -86,10 +86,12 @@ function (res::AbstractNetwork)(spike_train_generator, sim_τ=0.001, sim_T=0.1; 
     output_smmd = sum(sim.outputs[end-idx:end-Int(0.2*(idx+1)),:],dims=2)
 
     if all(output_smmd.==0)
-        return vec(output_smmd)
+        output_smmd = vec(output_smmd)
     else
-        return vec(LinearAlgebra.normalize(output_smmd, sim_T/sim_τ))
+        output_smmd = vec(LinearAlgebra.normalize(output_smmd, sim_T/sim_τ))
     end
+
+    return output_smmd
 end
 
 function (res::AbstractNetwork)(m::AbstractMatrix; visual)

@@ -1,15 +1,24 @@
 # Example
 
-
 ## Minimal usage:
 
 ``` julia
 using LiquidStateMachine
 
-params = LiquidStateMachine.LSM_Params(4,2,"cartpole")
-lsm = LiquidStateMachine.LSM(params)
+params = LSM_Params(4,2)
+lsm = LSM(params)
+x = [1,2,5,3]
 
-lsm([1,2,5,3])
+lsm(x)
+```
+
+## Ultra Minimal usage:
+``` julia
+using LiquidStateMachine
+
+x = [1,2,5,3]
+
+LSM(LSM_Params(4,2))(x)
 ```
 
 
@@ -28,8 +37,8 @@ rng = StableRNG(123)
 env = CartPoleEnv(; T = Float32, rng = rng)
 ns, na = length(state(env)), length(action_space(env))
 
-params = LiquidStateMachine.LSM_Params(ns,na,"cartpole")
-lsm = LiquidStateMachine.LSM(params)
+params = LSM_Params(ns,na,"cartpole")
+lsm = LSM(params)
 
 policy = Agent(
     policy = QBasedPolicy(

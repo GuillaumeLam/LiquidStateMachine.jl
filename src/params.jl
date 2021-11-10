@@ -25,10 +25,16 @@ struct LSM_Params{I<:Real, F<:Real}
     LSM_Params(
             n_in::I,res_in::I,ne::I,ni::I,res_out::I,n_out::I,K::I,C::I
             ) where {I<:Number} = LSM_Params(n_in,res_in,ne,ni,res_out,n_out,K,C,0.6,0.005,0.25,0.3,0.01)
+end
 
-    LSM_Params(n_in::I, n_out::I, env::String) where {I<:Real} = (
-        if env == "cartpole"
-            return LSM_Params(n_in,32,120,30,32,n_out,3,4)
-        end
-    )
+function LSM_Params(n_in::I, n_out::I, env::String) where {I<:Real}
+    if env == "cartpole"
+        return LSM_Params(n_in,32,120,30,32,n_out,3,4)
+    else
+        return LSM_Params(n_in,32,120,30,32,n_out,3,4)
+    end
+end
+
+function LSM_Params(n_in::I, n_out::I) where {I<:Real}
+    return LSM_Params(n_in, n_out, "default")
 end
