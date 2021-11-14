@@ -2,6 +2,7 @@ mutable struct LSM{N<:AbstractNetwork}
     preprocessing::Function
     st_gen::SpikeTrainGenerator
     reservoir::N
+    st_dec::SpikeTrainDecipher
     readout
 
     states_dict
@@ -17,7 +18,8 @@ mutable struct LSM{N<:AbstractNetwork}
         h = Zygote.ignore() do
             x̃ = lsm.preprocessing(x)
             st = lsm.st_gen(x̃)
-            return lsm.reservoir(st; visual=lsm.states_dict)
+            st = lsm.reservoir(st; visual=lsm.states_dict)
+            return lsm.st_dec(st)
         end
 
         z = lsm.readout(h)
@@ -36,6 +38,7 @@ mutable struct LSM{N<:AbstractNetwork}
             func,
             SpikeTrainGenerator(Distributions.Bernoulli, rng),
             res,
+            SpikeTrainDecipher(),
             readout,
             visual ?
                 Dict(
@@ -70,7 +73,7 @@ LSM(params::P; rng::R=StableRNGs.StableRNG(123), visual=false) where {P<:LSM_Par
 # Overloaded functions
 ###
 
-function (res::AbstractNetwork)(spike_train_generator, sim_τ=0.001, sim_T=0.1; visual)
+function (res::AbstractNetwork)(spike_train_generator; sim_τ=0.001, sim_T=0.1, visual=nothing)
     sim = simulate!(res, spike_train_generator, sim_τ, sim_T)
 
     # println(sim) => when res is learning, showing raster will be worth
@@ -83,15 +86,14 @@ function (res::AbstractNetwork)(spike_train_generator, sim_τ=0.001, sim_T=0.1; 
 
     idx = length(last(res.prev_outputs))-1
 
-    output_smmd = sum(sim.outputs[end-idx:end-Int(0.2*(idx+1)),:],dims=2)
+    println(idx)
+    println(size(sim.outputs))
 
-    if all(output_smmd.==0)
-        output_smmd = vec(output_smmd)
-    else
-        output_smmd = vec(LinearAlgebra.normalize(output_smmd, sim_T/sim_τ))
-    end
+    out = sim.outputs[end-idx:end-Int(0.2*(idx+1)),:]
 
-    return output_smmd
+    println(size(out))
+
+    return out
 end
 
 function (res::AbstractNetwork)(m::AbstractMatrix; visual)

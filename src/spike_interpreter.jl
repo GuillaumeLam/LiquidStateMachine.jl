@@ -33,3 +33,28 @@ end
 function (stg::SpikeTrainGenerator)(m::AbstractMatrix)
     return mapslices(stg, m, dims=1)
 end
+
+
+mutable struct SpikeTrainDecipher
+    f
+
+    SpikeTrainDecipher(f) = new(f)
+    function SpikeTrainDecipher()
+        f(x; sim_τ=0.001, sim_T=0.1) = begin
+            output_smmd = sum(x, dims=2)
+
+            if all(output_smmd.==0)
+                output_smmd = vec(output_smmd)
+            else
+                output_smmd = vec(LinearAlgebra.normalize(output_smmd, sim_T/sim_τ))
+            end
+
+            output_smmd
+        end
+        new(f)
+    end
+end
+
+function (std::SpikeTrainDecipher)(st; sim_τ=0.001, sim_T=0.1)
+    std.f(st; sim_τ=0.001, sim_T=0.1)
+end
