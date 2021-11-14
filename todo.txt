@@ -1,0 +1,1 @@
+remove spike train generator to allow to feed differnet noise into lsm
