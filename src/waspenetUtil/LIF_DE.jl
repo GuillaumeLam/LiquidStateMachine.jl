@@ -53,20 +53,25 @@ Vᵣ = -75.0  # reset potential
 τₘ = 10.0   # membrane time constant
 Rₘ = 0.1    # membrane resistance
 
+τ = 8.0     # time constant
+
 # ic = 5.0
 
-u0 = [-60.0, 5]
+u0 = -60.0
 tspan = (0.0, 100.0)
 
 function LIFNeuron(u, p, t)
-    Vᵣ, τₘ, Rₘ = p
-    (Rₘ*u[2] -(u[1]-Vᵣ))/τₘ
+    Vᵣ, τₘ, Rₘ, τ, ic = p
+    (Rₘ*ic -(u-Vᵣ))/τₘ
+    # u = u * exp(-t/τ) + Vᵣ
+    # u *= ic * (Rₘ/τ)
 end
 
-function solve_ODE!(u0)
-    p = (Vᵣ, τₘ, Rₘ)
+function solve_ODE!(u0,ic)
+    p = (Vᵣ, τₘ, Rₘ, ic)
+    # p = (Vᵣ, τₘ, Rₘ, τ, ic)
     println(u0)
-    prob = ODEProblem(LIFNeuron,u0,tspan,p)
+    prob = ODEProblem(LIFNeuron,u0[1],tspan,p)
     sol = solve(prob, Tsit5())
     if last(sol.u) >= Vₜ
         u0[1] = Vᵣ
