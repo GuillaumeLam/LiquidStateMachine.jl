@@ -4,7 +4,7 @@ struct ClNeuron{N<:AbstractNeuron, T<:Number} <: AbstractNeuron
     t_sls::T = 0    # Time since last spike
 
     c::T = 5.
-    cθ::T = 5.
+    cθ::T = 5
     cδ::T = 3.
 end
 
@@ -36,3 +36,6 @@ end
 
 # find firing timing of pre and post pairs
 # => check when neuron has fired timing since prev firings?
+
+# for stdp, might need to add to update function at network level
+# stdp -> network of neuron phenomena
