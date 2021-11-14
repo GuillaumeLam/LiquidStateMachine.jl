@@ -1,6 +1,6 @@
 # Example
 
-## Minimal usage:
+## Minimal usage
 
 ``` julia
 using LiquidStateMachine
@@ -9,20 +9,18 @@ params = LSM_Params(4,2)
 lsm = LSM(params)
 x = [1,2,5,3]
 
-lsm(x)
+y = lsm(x)
 ```
 
-## Ultra Minimal usage:
+## Ultra Minimal usage
 ``` julia
 using LiquidStateMachine
 
-x = [1,2,5,3]
-
-LSM(LSM_Params(4,2))(x)
+LSM(LSM_Params(4,2))([1,2,5,3])
 ```
 
 
-## ReinforcementLearning.jl usage:
+## ReinforcementLearning.jl usage
 
 As LiquidStateMachine.jl is differentiable thanks to Flux and Zygote, anywhere a Flux model can be passed, a LiquidStateMachine.jl LSM can be passed:
 
