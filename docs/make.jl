@@ -1,4 +1,5 @@
-using Documenter, LiquidStateMachine
+using Documenter
+using LiquidStateMachine
 
 makedocs(;
     sitename="LiquidStateMachine.jl Documentation",
