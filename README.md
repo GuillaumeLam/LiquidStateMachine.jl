@@ -1,5 +1,7 @@
 # LiquidStateMachine.jl
 
+[![CI](https://github.com/GuillaumeLam/LiquidStateMachine.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/GuillaumeLam/LiquidStateMachine.jl/actions/workflows/CI.yml)
+
 Package for LSM framework using WaspNet.jl at the core for spiking neuron dynamics.
 
 Interfaces with ReinforcementLearning.jl.
