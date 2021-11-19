@@ -17,9 +17,9 @@ mutable struct LSM{N<:AbstractNetwork}
 
         h = Zygote.ignore() do
             x̃ = lsm.preprocessing(x)
-            st = lsm.st_gen(x̃)
-            st = lsm.reservoir(st; visual=lsm.states_dict)
-            return lsm.st_dec(st)
+            st_in = lsm.st_gen(x̃)
+            st_out = lsm.reservoir(st_in; visual=lsm.states_dict)
+            return lsm.st_dec(st_out)
         end
 
         z = lsm.readout(h)
@@ -44,7 +44,7 @@ mutable struct LSM{N<:AbstractNetwork}
                 Dict(
                     "env"=>Array{Float64}(undef, 0, 4),
                     "out"=>Array{Float64}(undef, 0, 2),
-                    "spike"=>Vector{Float64}(undef, 0)
+                    "spike"=>Vector{Matrix{Float64}}()
                 ) :
                 nothing
         )
@@ -81,22 +81,22 @@ function (res::AbstractNetwork)(spike_train_generator; sim_τ=0.001, sim_T=0.1, 
     # println(size(sim.times))
 
     if !isnothing(visual)
-        visual["spike"] = cat(visual["spike"], [sim.outputs], dims=1)
+        push!(visual["spike"], sim.outputs)
     end
 
     idx = length(last(res.prev_outputs))-1
 
-    println(idx)
-    println(size(sim.outputs))
+    # println(idx)
+    # println(size(sim.outputs))
 
     out = sim.outputs[end-idx:end-Int(0.2*(idx+1)),:]
 
-    println(size(out))
+    # println(size(out))
 
     return out
 end
 
-function (res::AbstractNetwork)(m::AbstractMatrix; visual)
+function (res::AbstractNetwork)(m::AbstractMatrix, visual=nothing)
     v = map(x -> res(x; visual=visual), vec(m))
     return hcat(v...)
 end
