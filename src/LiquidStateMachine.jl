@@ -2,7 +2,7 @@ module LiquidStateMachine
 
 using CUDA
 using Distributions
-using DifferentialEquations
+# using DifferentialEquations
 using Flux
 using LinearAlgebra
 using Random
