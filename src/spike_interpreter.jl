@@ -8,30 +8,31 @@ mutable struct SpikeTrainGenerator
     SpikeTrainGenerator(d, rng) = new(d,[],rng)
 end
 
-function (stg::SpikeTrainGenerator)(x::AbstractVector)
+
+function (stg::SpikeTrainGenerator)(x̃::AbstractVector)
 
     if all(x.==0)
-        ds = product_distribution(stg.d.(x))
+        ds = product_distribution(stg.d.(x̃))
     else
-        norm = normalize(x)
+        norm = normalize(x̃)
         ds = product_distribution(stg.d.(norm))
     end
 
-    if !isnothing(stg.rng)
-        stg.sample = rand(stg.rng, ds)
-        f(_) =  rand!(stg.rng, ds, stg.sample)
-        stg.generator = f
-    else
+    if isnothing(stg.rng)
         stg.sample = rand(ds)
         g(_) = rand!(ds, stg.sample)
         stg.generator = g
+    else
+        stg.sample = rand(stg.rng, ds)
+        f(_) =  rand!(stg.rng, ds, stg.sample)
+        stg.generator = f
     end
 
     return stg.generator
 end
 
-function (stg::SpikeTrainGenerator)(m::AbstractMatrix)
-    return mapslices(stg, m, dims=1)
+function (stg::SpikeTrainGenerator)(X̃::AbstractMatrix)
+    return mapslices(stg, X̃, dims=1)
 end
 
 

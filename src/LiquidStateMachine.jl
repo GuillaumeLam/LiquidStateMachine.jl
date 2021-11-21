@@ -11,6 +11,9 @@ using WaspNet
 using Zygote
 
 include("util.jl")
+
+export genPositive, discretize
+
 include("params.jl")
 include("spike_interpreter.jl")
 include("lsm.jl")

@@ -73,8 +73,8 @@ LSM(params::P; rng::R=StableRNGs.StableRNG(123), visual=false) where {P<:LSM_Par
 # Overloaded functions
 ###
 
-function (res::AbstractNetwork)(spike_train_generator; sim_τ=0.001, sim_T=0.1, visual=nothing)
-    sim = simulate!(res, spike_train_generator, sim_τ, sim_T)
+function (res::AbstractNetwork)(st_in; sim_τ=0.001, sim_T=0.1, visual=nothing)
+    sim = simulate!(res, st_in, sim_τ, sim_T)
 
     # println(sim) => when res is learning, showing raster will be worth
     # println(size(sim.outputs)) # -> dim (182,101)
@@ -96,8 +96,8 @@ function (res::AbstractNetwork)(spike_train_generator; sim_τ=0.001, sim_T=0.1, 
     return out
 end
 
-function (res::AbstractNetwork)(m::AbstractMatrix, visual=nothing)
-    v = map(x -> res(x; visual=visual), vec(m))
+function (res::AbstractNetwork)(ST_IN::AbstractMatrix, visual=nothing)
+    v = map(x -> res(ST_IN; visual=visual), vec(m))
     return hcat(v...)
 end
 
