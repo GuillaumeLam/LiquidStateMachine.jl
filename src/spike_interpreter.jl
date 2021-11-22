@@ -4,7 +4,7 @@ mutable struct SpikeTrainGenerator
     rng
     generator
 
-    SpikeTrainGenerator(d) = new(d,[])
+    SpikeTrainGenerator(d) = new(d,[],nothing)
     SpikeTrainGenerator(d, rng) = new(d,[],rng)
 end
 
@@ -41,8 +41,8 @@ mutable struct SpikeTrainDecipher
 
     SpikeTrainDecipher(f) = new(f)
     function SpikeTrainDecipher()
-        f(x; sim_τ=0.001, sim_T=0.1) = begin
-            output_smmd = sum(x, dims=2)
+        f(st; sim_τ=0.001, sim_T=0.1) = begin
+            output_smmd = sum(st, dims=2)
 
             if all(output_smmd.==0)
                 output_smmd = vec(output_smmd)
