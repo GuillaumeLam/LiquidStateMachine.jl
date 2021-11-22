@@ -9,21 +9,33 @@ using CUDA
         x = [1.0, 2.0, 5.0, 3.0]
         y = lsm(x)
 
-        println(typeof(y))
         @test isa(y, Vector{Float64})
-        # @test isa(lsm([x x]), Vector{Float64})
     end
 
     @testset "Visual" begin
-        # A basic test
         params = LSM_Params(4,2)
         lsm = LSM(params, visual=true)
         x = [1.0, 2.0, 5.0, 3.0]
-        lsm(x)
-        lsm(x)
-        lsm(x)
+        n = 3
 
-        @test size(lsm.states_dict["spike"])[1] == 3
+        for _ in 1:n
+            lsm(x)
+        end
+
+        @test size(lsm.states_dict["spike"])[1] == n
+    end
+
+    @testset "Constructor" begin
+        params = LSM_Params(4,2)
+        readout = Chain(Dense(params.ne, params.res_out, relu),
+            Dense(params.res_out, params.n_out))
+        lsm = LSM(params, readout)
+        x = [1.0, 2.0, 5.0, 3.0]
+        y = lsm(x)
+
+        LSM(params, genPositive, readout)
+
+        @test isa(y, Vector{Float64})
     end
 
     @testset "Overload" begin
@@ -33,8 +45,4 @@ using CUDA
         @test Flux.trainable(lsm) == (lsm.readout,)
         @test CUDA.device(lsm) == Val(:cpu)
     end
-
-    # @testset "Constructor" begin
-    #
-    # end
 end

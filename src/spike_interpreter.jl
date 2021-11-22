@@ -11,7 +11,7 @@ end
 
 function (stg::SpikeTrainGenerator)(x̃::AbstractVector)
 
-    if all(x.==0)
+    if all(x̃.==0)
         ds = product_distribution(stg.d.(x̃))
     else
         norm = normalize(x̃)
