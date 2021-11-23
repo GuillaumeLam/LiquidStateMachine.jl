@@ -12,6 +12,13 @@ using CUDA
         @test isa(y, Vector{Float64})
     end
 
+    @testset "Params" begin
+        cartpole_params = LSM_Params(4,2,"cartpole")
+        default_params = LSM_Params(4,2)
+
+        @test cartpole_params == default_params
+    end
+
     @testset "Visual" begin
         params = LSM_Params(4,2)
         lsm = LSM(params, visual=true)
